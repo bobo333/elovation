@@ -19,7 +19,7 @@ module Rater
       end
     end
 
-    def update_ratings game, teams
+    def update_ratings game, teams, create_date=nil
       winning_teams = teams.select{|team| team.rank == Team::FIRST_PLACE_RANK}
 
       if winning_teams.size > 1
@@ -45,8 +45,8 @@ module Rater
         first_elo.wins_from(second_elo)
       end
 
-      _update_rating_from_elo(first_rating, first_elo)
-      _update_rating_from_elo(second_rating, second_elo)
+      _update_rating_from_elo(first_rating, first_elo, create_date)
+      _update_rating_from_elo(second_rating, second_elo, create_date)
     end
 
     def to_elo rating
@@ -57,10 +57,15 @@ module Rater
       )
     end
 
-    def _update_rating_from_elo(rating, elo)
+    def _update_rating_from_elo(rating, elo, create_date)
+      history_params = {value: elo.rating}
+      if create_date.nil? then
+        history_params[:created_at] = create_date
+      end
+
       Rating.transaction do
         rating.update_attributes!(value: elo.rating, pro: elo.pro?)
-        rating.history_events.create!(value: elo.rating)
+        rating.history_events.create! history_params
       end
     end
   end
