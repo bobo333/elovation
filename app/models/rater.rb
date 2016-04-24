@@ -59,7 +59,7 @@ module Rater
 
     def _update_rating_from_elo(rating, elo, create_date)
       history_params = {value: elo.rating}
-      if create_date.nil? then
+      if create_date.present? then
         history_params[:created_at] = create_date
       end
 
