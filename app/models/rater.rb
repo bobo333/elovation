@@ -86,7 +86,7 @@ module Rater
     def validate_game game
     end
 
-    def update_ratings game, teams
+    def update_ratings game, teams, create_date=nil
       ratings_to_ranks = teams.sort_by(&:rank).each_with_object({}){ |team, hash| hash[team.players.map{|player| player.ratings.find_or_create(game)}] = team.rank }
 
       ratings_to_trueskill = {}
@@ -102,7 +102,7 @@ module Rater
       graph.update_skills
 
       ratings_to_trueskill.each do |rating, trueskill|
-        _update_rating_from_trueskill rating, trueskill
+        _update_rating_from_trueskill rating, trueskill, create_date
       end
     end
 
@@ -113,12 +113,20 @@ module Rater
       )
     end
 
-    def _update_rating_from_trueskill rating, trueskill
+    def _update_rating_from_trueskill rating, trueskill, create_date
       Rating.transaction do
         attributes = { value: (trueskill.mean - (3.0 * trueskill.deviation)) * 100,
                        trueskill_mean: trueskill.mean,
                        trueskill_deviation: trueskill.deviation }
+
         rating.update_attributes! attributes
+
+        # if create_date is present, only add it to attributes for the history_event
+        # not the rating itself
+        if create_date.present? then
+          attributes[:created_at] = create_date
+        end
+
         rating.history_events.create! attributes
       end
     end
