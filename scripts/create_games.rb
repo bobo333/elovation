@@ -46,7 +46,11 @@ years.each do |year|
 
     # get game
     year_string = year.sub('_', '-')
-    game = Game.find_by_name("#{year_string} Season")
+
+    season_name = "#{year_string} Season"
+
+    elo_game = Game.where(name: season_name, rating_type: 'elo').first
+    ts_game = Game.where(name: season_name, rating_type: 'trueskill').first
 
     # pass game and teams (winner first, loser 2nd) to ResultService function
 
@@ -74,7 +78,11 @@ years.each do |year|
                             players: [loser]
                         }
 
-        create_result game, res_obj, create_date
+        # create elo result
+        create_result elo_game, res_obj, create_date
+
+        # create trueskill result
+        create_result ts_game, res_obj, create_date
     end
 
 
