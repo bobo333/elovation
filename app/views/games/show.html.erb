@@ -45,8 +45,8 @@
 <div class="row">
   <h2>Progress</h2>
   <% if @game.rating_type == 'elo' %>
-    <%= line_chart @chart_data, min: 500, max: 1500, height: "1000px" %>
+    <%= line_chart @chart_data, min: 500, max: 1500, height: "1000px", xtitle: "Games", ytitle: "ELO" %>
   <% else %>
-    <%= line_chart @chart_data, min: -500, max: 3200, height: "1000px" %>
+    <%= line_chart @chart_data, min: -500, max: 3200, height: "1000px", xtitle: "Games", ytitle: "Trueskill" %>
   <% end %>
 </div>
